@@ -1,0 +1,13 @@
+# Never commit your personal Alpha Vantage API key
+alphavantage_key.txt
+.alphavantage_key
+av_key.txt
+
+# Never commit your personal financial data
+*.csv
+!Ref_file.csv
+portfolio_snapshot.html
+assessment.txt
+_chart_*.png
+__pycache__/
+*.pyc
