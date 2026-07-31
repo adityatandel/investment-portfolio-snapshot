@@ -1,6 +1,6 @@
 # Investment Portfolio Snapshot
 
-Generate a professional, wealth-advisor-style HTML report of your current
+Generate a free professional, wealth-advisor-style HTML report of your current
 investment portfolio from your brokerage export files — from any brokerage.
 
 The report includes:
