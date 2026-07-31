@@ -9,5 +9,4 @@ av_key.txt
 portfolio_snapshot.html
 assessment.txt
 _chart_*.png
-__pycache__/
-*.pyc
+.DS_Store

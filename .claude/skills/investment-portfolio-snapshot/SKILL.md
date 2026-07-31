@@ -1,13 +1,14 @@
 ---
 name: investment-portfolio-snapshot
-description: Generate a professional wealth-advisor PDF report showing a current snapshot of someone's investment portfolio, aggregated from raw brokerage CSV exports (any brokerage). Extracts holdings, classifies them by asset type and sector via yfinance, and produces a PDF with an AI-written assessment and allocation charts. Use when the user wants a portfolio snapshot, allocation report, or wealth summary from their brokerage export files.
+description: Generate a professional wealth-advisor HTML report showing a current snapshot of someone's investment portfolio, aggregated from raw brokerage CSV exports (any brokerage). Extracts holdings, classifies them by asset type and sector via yfinance, and produces a self-contained HTML report with an AI-written assessment and allocation charts. Use when the user wants a portfolio snapshot, allocation report, or wealth summary from their brokerage export files.
 disable-model-invocation: true
 ---
 
 # Investment Portfolio Snapshot
 
-Turns a folder of raw brokerage CSV exports into a professional PDF portfolio
+Turns a folder of raw brokerage CSV exports into a professional HTML portfolio
 report with an advisor-style written assessment and modern allocation charts.
+Works on Mac, Windows, and Linux.
 
 ## Step 0 — Check dependencies FIRST (before anything else)
 
@@ -31,6 +32,10 @@ install/set it. Only proceed after they agree:
   ```
   pip install yfinance matplotlib
   ```
+  On Windows, if `pip` is not recognized, try `pip3` instead (or vice versa) —
+  which one works depends on how Python was installed. Same applies to every
+  `python3 ...` command in this skill: on Windows, try `python` if `python3`
+  isn't recognized.
 - `ALPHAVANTAGE_API_KEY` missing:
   Tell the user this key is a FALLBACK for ETF sector look-through. The skill
   always tries yfinance first for every symbol (no key needed); Alpha Vantage
@@ -62,9 +67,23 @@ optional but strongly recommended — proceed without it only if the user declin
 python3 ${CLAUDE_SKILL_DIR}/scripts/extract_holdings.py
 ```
 Reads every CSV export in the folder, finds the symbol and market-value columns
-in each, and writes `holdings_combined.csv` (summing duplicates across files).
-If any file could not be parsed, it is reported — tell the user which file and
-that its holdings were excluded.
+in each, and writes `holdings_combined.csv` (summing duplicates across files,
+so the same symbol held at two brokerages adds up correctly into one total).
+
+This step also scans each file and reports, by filename:
+- **Errors** (file excluded from the report): empty files, unreadable/wrong-format
+  files, or files where no Symbol + Market Value column pair could be found.
+- **Warnings** (file still processed, but flag to the user): a likely account
+  number or similar identifier detected in the file, or transaction rows
+  (trades, dividends, debits/credits, transfers) that were ignored because this
+  report only shows current holdings, not activity history.
+
+**Always relay every warning and error to the user by filename, in plain
+language**, even if the run otherwise succeeds. For an account-number warning,
+explicitly tell the user which file it's in and ask them to remove that column
+before their next run — do not proceed to guess or redact it yourself. For a
+file-level error, tell the user clearly that file's holdings were NOT included
+and why, so they can fix and re-run if needed.
 
 ## Step 2 — Enrich with asset type & sector
 ```
@@ -115,4 +134,7 @@ Tell the user the report is ready at `portfolio_snapshot.html` — they can open
 - The report always prints a clear "not financial advice / guide only" note.
 - Classification is best-effort. Offer the cache-edit + re-run path if needed.
 - Never invent market values or holdings. Use only what the files contain.
+- This skill assumes all values are in USD and does not convert currencies.
+  If the user's files contain non-USD values, warn them that totals and the
+  report's "$" labeling will be inaccurate.
 - Do not modify the user's raw export files.
